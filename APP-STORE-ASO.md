@@ -1,169 +1,298 @@
-﻿# Ghost Escape — App Store Connect paste pack (Horror Survival / 5.0)
+﻿# Ghost Escape — App Store Connect ASO Package (5.0.0)
 
-## Build note
-`web/index.html` is now **Ghost Escape 5.0.0 — The House Remembers** (from `GhostEscape-5.0.0-Game.zip`).
-Old chase shell removed from Capacitor web. Rebuild Codemagic on `main` before Add for Review — discard the old TestFlight chase IPA.
+**Source of truth:** `GhostEscape-5.0.0-Game.zip` + live Play listing for `com.ghostescape.game`.  
+**Binary:** Capacitor `web/index.html` is already **5.0.0 — The House Remembers** (commit `42ecade+`).  
+**Do not use:** `turn-chase/store-listing` “ONE TAP · TWO WORLDS” chase PNGs / copy.
+
+| Field | Value |
+|---|---|
+| ASC name | Ghost Escape: Horror Survival (29/30) |
+| Bundle ID | `com.ghostescape.game` |
+| Apple ID | `6832596667` |
+| Version | 5.0.0 |
+| Play Store | https://play.google.com/store/apps/details?id=com.ghostescape.game |
+| Publisher | Callisto Solutions |
+| Support email | rahmanik1228@gmail.com |
+| Privacy URL | https://cdn.jsdelivr.net/gh/Rahman-dev-ML/ghost-escape@main/privacy.html |
 
 ---
 
-## Product Page — English (U.S.)
+## Paste-ready ASC fields
 
-### Name (30)
+### Name (≤30) — 29 chars
+
+```
 Ghost Escape: Horror Survival
+```
 
-### Subtitle (30)
-Find seals. Hide. Escape.
+### Subtitle (≤30) — 25 chars
 
-### Promotional Text (170)
-Three seals bind the door. Explore the house, hold your beam, hide when it hunts — and get out before your resolve breaks. Offline horror. No ads.
+```
+Find Seals. Hide. Escape.
+```
 
-### Description (paste all)
+### Promotional Text (≤170) — 110 chars
+
+```
+Five haunted layouts. Five hunters. Find three seals, hold the beam, hide before it sees you. Offline. No ads.
+```
+
+### Description (≤4000)
+
+```
 Three seals bind the door. Something in the house wants you to stay.
 
-Ghost Escape is a first-person survival horror game set inside a haunted house. Explore its rooms, recover three seals and return to the exit before the ghost breaks your resolve. Your flashlight can buy you time. Your hiding place can buy you a breath. Neither will keep you safe forever.
+Ghost Escape is a first-person horror survival game set inside a haunted house. Explore dark rooms and corridors, recover three seals, and reach the exit before the ghost breaks your resolve. Your flashlight can buy you time. A wardrobe can buy you a breath. Neither will keep you safe forever.
 
-EXPLORE. FIND THE SEALS. REACH THE EXIT.
-Move freely through furnished rooms and dark corridors. Follow pale floor lights toward the next seal, watch your compass and keep an eye on your resolve, stamina and light charge. Collect all three seals to unlock the way out.
+EXPLORE. FIND THE SEALS. REACH THE EXIT
+• Move freely through furnished rooms and dark corridors
+• Follow pale floor lights toward the next seal
+• Watch your compass, resolve, stamina, and light charge
+• Collect all three seals to unlock the way out
 
-HOLD YOUR BEAM. HOLD YOUR NERVE.
-Aim your flashlight at the ghost and hold BEAM to drive it back. Keep the light on it long enough to banish it briefly. Release to recharge, or find a flask of light when your charge runs low.
+HOLD YOUR BEAM. HOLD YOUR NERVE
+• Aim your flashlight at the ghost and hold BEAM to drive it back
+• Keep the light on it long enough to banish it briefly
+• Release to recharge — or find a flask of light when charge runs low
 
-HIDE BEFORE IT SEES YOU.
-Slip into a wardrobe and watch through the slats as the ghost passes. Your breath is limited, and cover will not save you if it watched you enter. Choose your moment to leave.
+HIDE BEFORE IT SEES YOU
+• Slip into a wardrobe and watch through the slats as the ghost passes
+• Your breath is limited — cover will not save you if it watched you enter
+• Choose your moment to leave
 
-LISTEN. IT CAN MOVE.
-A sharp inhale warns of a rush. Cold air signals a new manifestation. Learn the different hunting patterns of the Widow, the Listener and the Drifter. The map holds fading echoes of where the ghost was; it cannot tell you where it is now.
+LISTEN. IT CAN MOVE
+• A sharp inhale warns of a rush
+• Cold air signals a new manifestation
+• Learn hunting patterns: Widow, Listener, Drifter, Watcher, and Whisper
+• The map holds fading echoes of where the ghost was — not where it is now
 
-THE HOUSE GOES ON.
-Each escape leads to another floor, with changing routes, seal locations and increasing pressure. Survive as many floors as you can, return for the Daily Haunt or share a challenge code so a friend can try the same house. Challenge records stay on each device.
+THE HOUSE GOES ON — 5.0.0
+• Five environment families: Ashwood Manor, Saint Mercy Ward, Chapel, Forgotten Attic, Flooded Cellar
+• Seeded routes, pickups, and starting hunters so each escape feels different
+• Challenges: restore power, beam rituals, avoid noisy glass, survive blackouts
+• Endless floors with rising pressure after every escape
+• Daily Haunt seeds and challenge codes (GE50) you can share
+• 12 optional journal pages, objectives, and six flashlight finishes
+• Save an active escape and continue later
 
-UNCOVER WHAT THE HOUSE REMEMBERS.
-Find 12 optional journal pages, complete objectives and collect six flashlight finishes. Save an active escape and continue later.
-
-PLAY YOUR WAY.
-Play offline with touch movement and drag-to-look controls. Adjust music and sound separately, choose gentler lighting, reduce camera motion or use lower-detail graphics.
+PLAY YOUR WAY
+• Fully offline — play without an account
+• Touch move pad + drag-to-look (adjust pad size and sensitivity)
+• Hands-on tutorial (skip or replay from Controls)
+• Separate music and effects volume, sound check, gentler lighting and reduced camera motion options
+• No ads. No tracking. No in-app purchases.
 
 Put on headphones. Find the three seals. Listen before you turn the corner.
+```
 
-### Keywords (100 chars max — paste exact)
-horror,survival,escape,flashlight,haunted,house,offline,fps,hide,seals,ghost,scary
+### Keywords (≤100) — 99 chars
+
+Rules: comma-separated, **no spaces after commas**, no repeats of Name/Subtitle words (`ghost`, `escape`, `horror`, `survival`, `find`, `seals`, `hide`).
+
+```
+haunted,flashlight,stealth,scary,chase,offline,manor,wardrobe,fear,noise,attic,fps,dark,hunter,beam
+```
 
 ### Support URL
+
+```
 https://cdn.jsdelivr.net/gh/Rahman-dev-ML/ghost-escape@main/privacy.html
+```
 
-### Marketing URL
-(leave blank)
+(Contact on that page / listing: rahmanik1228@gmail.com. If Apple requires a dedicated support page later, keep the same email visible.)
 
-### Version
-1.0
+### Privacy Policy URL
+
+```
+https://cdn.jsdelivr.net/gh/Rahman-dev-ML/ghost-escape@main/privacy.html
+```
 
 ### Copyright
-2026 Callisto Solutions
 
-### Routing App Coverage File
-(none)
+```
+© 2026 Callisto Solutions
+```
 
----
+### Categories
 
-## Screenshots & Header (folder already open on Desktop)
-
-Folder: `C:\Users\Lenovo\Desktop\GhostEscape-AppStore-Assets`
-
-| ASC slot | Folder / file | Upload order |
+| Slot | Recommendation | Why |
 |---|---|---|
-| iPhone 6.3" (1206×2622) | `iphone-6.3-1206x2622\` | 01 beam → 02 house → 03 seals → 04 hide → 05 hud → 06 map |
-| iPhone Duo outer (1398×2034) | `iphone-duo-outer-1398x2034\` | same 01–06 |
-| iPhone Duo inner (2007×2853) | `iphone-duo-inner-2007x2853\` | same 01–06 |
-| iPad 13" (2064×2752) | `ipad-13-2064x2752\` | same 01–06 |
-| Header 5244×2950 | `header-search\header-5244x2950.png` | Header |
-| Search 5244×2950 | `header-search\search-5244x2950.png` | Search Results |
-| Alt header 3840×1646 | `header-search\header-3840x1646.png` | if ASC asks |
-| **App Icon 1024** | `AppIcon-1024.png` | ASC → App Information → App Icon (if separate) |
+| Primary | **Games → Adventure** | Exploration, seals, floors, escape loop (Granny / Evil Nun class) |
+| Secondary | **Games → Action** | Chase, beam combat, hide-under-pressure |
 
-Screenshots are real Play-pack art (beam / house / seals / hide / HUD / map echo) — not chase-game placeholders.
+Alternate secondary if Adventure+Action feels crowded: **Puzzle** (rituals / power / glass challenges). Prefer Action for discovery.
 
----
+### Age Rating questionnaire (answer honestly)
 
-## App Information
+Content is atmospheric first-person haunting with pursuit, jump-scare tension, and fear themes. **No gore, blood, sexual content, gambling, or user-generated chat** in 5.0.0.
 
-### Category
-Primary: Games → **Action**  
-Secondary: **Adventure**
+| Apple question theme | Suggested answer | Notes |
+|---|---|---|
+| Cartoon or Fantasy Violence | None / Infrequent | Pursuit / “caught” fail state; no graphic injury |
+| Realistic Violence | None | No weapons-on-humans / blood |
+| Horror / Fear Themes | **Infrequent / Mild → expect 12+** | Haunted house, stalker ghosts, wardrobe hide, audio scare cues |
+| Mature / Suggestive Themes | None | — |
+| Profanity / Crude Humor | None | — |
+| Alcohol / Tobacco / Drugs | None | — |
+| Medical / Treatment Info | None | Hospital-ward *aesthetic* only; not medical advice |
+| Gambling | None | — |
+| Contests | None | Challenge codes are local / shareable seeds, not contests |
+| Unrestricted Web Access | No | Offline game |
+| User-Generated Content | No | — |
 
-### Age Ratings (answers)
-- Horror/Fear Themes: **Frequent / Intense**
-- Cartoon or Fantasy Violence: **Infrequent**
-- Guns or Other Weapons: **None** (flashlight only)
-- Realistic Violence / Prolonged Graphic: **None**
-- Profanity: **None**
-- Alcohol / Tobacco / Drugs: **None**
-- Medical: **None**
-- Sexual Content / Nudity: **None**
-- Gambling / Loot Boxes: **None**
-- Unrestricted Web Access / UGC / Chat / Ads: **No**
-- Parental Controls / Age Assurance: **No**
+**Expected age rating band:** **12+** (Horror/Fear Themes).  
+Play Console currently shows “Everyone” — that understates horror/fear for Apple; do **not** claim 4+ on ASC.
 
-Expect **12+** (horror).
+### App Privacy (nutrition labels)
 
-### Content Rights
-Does not contain third-party content you do not have rights to.  
-(Or: you own / licensed all art, audio, code.)
+Match privacy policy + Play Data safety:
 
-### License Agreement
-Apple’s Standard License Agreement
-
-### App Privacy
 **Data Not Collected**
 
-### Encryption
-Info.plist already has `ITSAppUsesNonExemptEncryption` = **false**  
-In ASC: “App uses non-exempt encryption” → **No**
+- No account / contact info  
+- No Location  
+- No Identifiers / Advertising  
+- No Usage Data / Analytics / Crash  
+- No Diagnostics shared  
+- No Purchases  
+- Local-only: best score / progress / mute / settings on device  
 
-### Digital Services Act
-Complete trader / DSA contact if ASC requires it for your account region (EU). Use your Callisto / personal contact details.
+Declare **no tracking**. Internet may appear from framework packaging; app does not send personal data (state this in Review Notes).
 
----
+### Review Notes
 
-## Build
+```
+Ghost Escape 5.0.0 — offline first-person haunted-house survival.
 
-1. Codemagic rebuild on `main` (icon push `9c11333`) **after** `www` is the real 5.0 horror game — not the chase shell.
-2. Add Build → select new build.
-3. Game Center → **off** / skip.
+HOW TO DEMO
+1. Landscape only (sensor-landscape). Rotate device if prompted.
+2. Optional tutorial on first entry — Skip is fine; or replay from Controls.
+3. Move with left pad; drag elsewhere to look; hold BEAM to repel the ghost; hide in wardrobes.
+4. Goal: collect 3 seals → reach exit. Survive further floors for endless progression.
 
----
+NO LOGIN / NO IAP / NO ADS / NO MULTIPLAYER
+Progress saves on device. Challenge codes use GE50 format. Daily Haunt is local seed-based.
 
-## App Review Information
+PRIVACY
+Stores best score, collectibles/progress, and mute/settings locally only. Nothing is sent to our servers. Privacy: https://cdn.jsdelivr.net/gh/Rahman-dev-ML/ghost-escape@main/privacy.html
+Support: rahmanik1228@gmail.com
 
-### Sign-in required
-**No** (offline; no account)
+BUNDLE
+com.ghostescape.game — same as Google Play. Apple ID 6832596667.
+```
 
-### Contact
-- First name: Abdul
-- Last name: Rahman
-- Phone: +923125078253
-- Email: rahmanik1228@gmail.com
+### What’s New (5.0.0)
 
-### Notes (paste)
-Offline first-person horror survival. Goal: find 3 seals on each floor, hide in wardrobes when hunted, hold BEAM (flashlight) on the ghost to repel it, then exit. No login, no IAP, no ads, no internet required. Landscape. Tutorial can be skipped from Controls / Settings. Headphones recommended.
-
-Demo path for review:
-1. Tap ENTER THE HOUSE.
-2. Move with left pad, look by dragging.
-3. Pick up a seal (glowing object). Hold BEAM on red seals if the floor requires unbinding.
-4. When the ghost appears, hold BEAM on it or hide in a wardrobe.
-5. After 3 seals, go to the exit door.
-
-### Attachment
-Optional: none needed.
-
----
-
-## Version Release
-Manually release this version (recommended for first ship).
+```
+Ghost Escape 5.0.0
+• Larger adjustable move pad and faster touch look
+• Hands-on tutorial (skip/replay from Controls)
+• Five house layouts and five hunters
+• Clearer health/noise HUD and stronger positional audio
+• Settings: pad size, sensitivity, volume, sound check
+```
 
 ---
 
-## Icon status
-- Brand icon **is** in the repo: `ios/.../AppIcon.appiconset/AppIcon-512@2x.png` (1024×1024 RGB) — pushed `9c11333`.
-- Store upload copy: `GhostEscape-AppStore-Assets\AppIcon-1024.png`
-- Old TestFlight still shows Capacitor wireframe until you rebuild with this commit + correct game binary.
+## Product summary (5.0.0 — what the listing must describe)
+
+| Pillar | Detail |
+|---|---|
+| Genre | First-person horror survival / house escape |
+| Core loop | Explore → collect 3 seals → beam / hide vs hunter → exit → next floor |
+| USP | Offline haunted-house escape with **distinct hunters**, **beam defense**, **wardrobe stealth**, and **seeded multi-layout floors** — no ads/accounts |
+| Controls | Dual-touch: move pad + look; adjustable size/sensitivity; optional noisy full-tilt sprint |
+| Modes | Endless floors, Daily Haunt, shareable challenge codes (GE50), journal/objectives/cosmetics, save/continue |
+| Environments | Ashwood Manor, Saint Mercy Ward, Chapel, Forgotten Attic, Flooded Cellar |
+| Hunters | Widow, Listener, Drifter, Watcher, Whisper |
+| Challenges | Search; restore power; beam rituals; avoid glass noise; blackouts |
+
+---
+
+## Competitor table & positioning
+
+| App | Store angle | Overlap | Diff vs Ghost Escape 5.0 |
+|---|---|---|---|
+| **Granny** (Play-class; massive DL) | House escape, noise attracts antagonist, hide | Core fantasy | We add beam banish, multi-hunter rules, seeded endless floors, offline clean privacy |
+| **Eyes – the horror game** | Locations + named hunters | Multi-hunter / limited info | We keep map echoes historical (not live radar); seals + beam ritual loop |
+| **Evil Nun** | Explore, puzzles, multi routes | Challenges / route choice | Lighter puzzle load; faster mobile horror loop; no ads/IAP in this build |
+| **Ghost Escape Survival Game** (ASC) | Haunted mansion, hide, light tools | Name-adjacent | We are single-player offline, no multiplayer possession gimmick, clearer seal/beam objective |
+| **Fears to Fathom** | Narrative FP horror, flashlight, stealth | Atmosphere / FP horror | We are endless floor survival + systems hunters, not chapter story |
+| **GhostLoop** | Arcade “outrun past self” | “Ghost” keyword only | Completely different genre (arena runner) |
+| **SCP Runner / Frogman Run** | Horror **endless runners** | Horror + chase keywords | We are **stealth exploration**, not lane-runner |
+| **Cursed Manor / hotel escapes** | Ads-heavy haunted escape | Keyword competition | Position as **no ads, no account, offline**, sharper controls (5.0) |
+
+### Positioning line (ASO / social)
+
+> Offline haunted-house survival: find three seals, hold your beam, hide before five different hunters learn how you move.
+
+**Keyword strategy:** Brand + genre in Name; verb loop in Subtitle; Keywords harvest haunted/flashlight/stealth/chase/offline/FPS-adjacent terms **not** already in title/subtitle. Avoid competing only with runner titles (GhostLoop / SCP Runner) in creative — screenshots must show **rooms, seals, beam, wardrobe**, not corridor sprint.
+
+---
+
+## Screenshot plan
+
+### Ready-to-upload folder (use this)
+
+`C:\Users\Lenovo\Desktop\GhostEscape-AppStore-Assets`
+
+| ASC slot | Folder / file |
+|---|---|
+| iPhone 6.3″ (1206×2622) | `iphone-6.3-1206x2622\` |
+| iPhone Duo outer (1398×2034) | `iphone-duo-outer-1398x2034\` |
+| iPhone Duo inner (2007×2853) | `iphone-duo-inner-2007x2853\` |
+| iPad 13″ (2064×2752) | `ipad-13-2064x2752\` |
+| Header / Search | `header-search\` |
+| App Icon 1024 | `AppIcon-1024.png` |
+
+Shots are real haunted-house art (beam / house / seals / hide / HUD / map) — **not** Turn Chase.
+
+| Asset set | Usable? |
+|---|---|
+| `GhostEscape-AppStore-Assets\` above | **YES — upload these** |
+| `turn-chase/store-listing\*` | **NO** — wrong game |
+| Optional later: fresh landscape captures from 5.0.0 HTML/APK | Nice-to-have if you want native landscape framing |
+
+Game plays **landscape**; ASC also accepts the portrait marketing sizes already exported in that folder.
+
+### Shot list (order = conversion order)
+
+| # | Frame | On-screen caption idea (keep short) | Shows USP |
+|---|---|---|---|
+| 01 | Dark furnished corridor + floor path lights | FIND THE SEALS | Explore |
+| 02 | Seal pickup / compass / resolve HUD | THREE SEALS TO EXIT | Objective |
+| 03 | Flashlight BEAM on hunter | HOLD THE BEAM | Defense USP |
+| 04 | Inside wardrobe slats, ghost passing | HIDE BEFORE IT SEES YOU | Stealth |
+| 05 | Distinct hunter moment (Widow rush or Whisper drain) | FIVE HUNTERS. LEARN THEM. | Variety |
+| 06 | Second environment (Ward / Chapel / Cellar) | FIVE HOUSE LAYOUTS | Replay |
+| 07 | Noise / health / blackout or glass challenge | LISTEN. STAY QUIET. | Systems |
+| 08 | Settings / pad size (optional) or journal page | OFFLINE. NO ADS. | Trust / privacy |
+
+**First three shots** appear in search — prioritize seals, beam, hide.
+
+### Asset workflow
+
+1. Upload from `Desktop\GhostEscape-AppStore-Assets` (already sized).  
+2. Do **not** reuse `turn-chase/store-listing` PNGs.  
+3. App icon: `AppIcon-1024.png` (also forced in iOS AppIcon on `main`).
+
+---
+
+## Consistency checklist before submit
+
+- [ ] Binary is Codemagic build from `main` with 5.0.0 `web/` + TestFlight upload enabled
+- [ ] Screenshots from `GhostEscape-AppStore-Assets` (not Turn Chase)
+- [ ] Subtitle is **Find Seals. Hide. Escape.** (not one-tap / two worlds)
+- [ ] App Privacy = Data Not Collected
+- [ ] Age rating includes Horror/Fear (likely 12+)
+- [ ] Privacy + Support URLs resolve
+- [ ] Copyright © 2026 Callisto Solutions
+- [ ] What’s New matches 5.0.0 notes
+
+---
+
+## Reference links
+
+- Play: https://play.google.com/store/apps/details?id=com.ghostescape.game  
+- Privacy: https://cdn.jsdelivr.net/gh/Rahman-dev-ML/ghost-escape@main/privacy.html  
+- 5.0 research (in zip): `RESEARCH-AND-CHANGES-5.0.md`, `RELEASE.md`, `START-HERE.txt`
