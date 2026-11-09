@@ -1,0 +1,54 @@
+# Ghost Escape — Capacitor 8 iOS (App Store / TestFlight)
+# Bundle ID must match Android: com.ghostescape.game
+
+workflows:
+  ghost-escape-ios:
+    name: Ghost Escape iOS (App Store)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.ghostescape.game
+      vars:
+        BUNDLE_ID: "com.ghostescape.game"
+        XCODE_PROJECT: "App.xcodeproj"
+        XCODE_SCHEME: "App"
+        # Replace after App Store Connect → App Information → Apple ID
+        APP_STORE_APPLE_ID: 0000000000
+      node: 22
+      xcode: latest
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm ci || npm install
+      - name: Sync Capacitor iOS
+        script: |
+          npx cap sync ios
+      - name: Set up code signing profiles
+        script: xcode-project use-profiles
+      - name: Increment build number
+        script: |
+          cd $CM_BUILD_DIR/ios/App
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || true)
+          if [ -z "$LATEST_BUILD_NUMBER" ] || [ "$LATEST_BUILD_NUMBER" = "null" ]; then
+            UPDATED_BUILD_NUMBER=$BUILD_NUMBER
+          else
+            UPDATED_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
+          fi
+          agvtool new-version -all "$UPDATED_BUILD_NUMBER"
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/ios/App/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: false
+        submit_to_app_store: false

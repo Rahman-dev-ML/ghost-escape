@@ -1,0 +1,21 @@
+{
+  "appId": "com.ghostescape.game",
+  "appName": "Ghost Escape",
+  "webDir": "web",
+  "android": {
+    "backgroundColor": "#07060c"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "backgroundColor": "#07060c",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "DARK",
+      "backgroundColor": "#07060c"
+    }
+  }
+}
