@@ -44,8 +44,15 @@ workflows:
           xcode-project build-ipa \
             --project "$CM_BUILD_DIR/ios/App/$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
+          # Ensure IPA is where Codemagic publishing looks (same issue as Beat Our AI).
+          mkdir -p "$CM_BUILD_DIR/build/ios/ipa"
+          find "$CM_BUILD_DIR" -type f -name "*.ipa" -print
+          find "$CM_BUILD_DIR" -type f -name "*.ipa" -exec cp -f {} "$CM_BUILD_DIR/build/ios/ipa/" \;
+          ls -la "$CM_BUILD_DIR/build/ios/ipa"
     artifacts:
       - build/ios/ipa/*.ipa
+      - ios/**/ipa/*.ipa
+      - "**/*.ipa"
       - /tmp/xcodebuild_logs/*.log
     publishing:
       app_store_connect:
