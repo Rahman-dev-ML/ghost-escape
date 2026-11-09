@@ -1,9 +1,8 @@
 ﻿# Ghost Escape — App Store Connect paste pack (Horror Survival / 5.0)
 
-## CRITICAL
-Current TestFlight IPA is the OLD Capacitor chase game (“ONE TAP TWO WORLDS”).
-Do **not** Add for Review with that build + this Horror listing.
-Rebuild after swapping `www` to GhostEscape-5.0.0 HTML (or ship the real 5.0 binary). Icon fix is already on `main` (`9c11333`).
+## Build note
+`web/index.html` is now **Ghost Escape 5.0.0 — The House Remembers** (from `GhostEscape-5.0.0-Game.zip`).
+Old chase shell removed from Capacitor web. Rebuild Codemagic on `main` before Add for Review — discard the old TestFlight chase IPA.
 
 ---
 
