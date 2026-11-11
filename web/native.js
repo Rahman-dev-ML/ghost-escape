@@ -1,0 +1,2 @@
+'use strict';
+(function(){const cap=window.Capacitor;if(!cap||!cap.isNativePlatform())return;try{const app=cap.Plugins.App;if(app){app.addListener('backButton',()=>{if(window.GhostEscapeBack)window.GhostEscapeBack();});app.addListener('appStateChange',state=>{if(!state.isActive&&window.GhostEscapePause)window.GhostEscapePause();});window.GhostEscapeExit=()=>app.exitApp();}const splash=cap.Plugins.SplashScreen;if(splash)splash.hide();}catch(e){console.warn('Native lifecycle unavailable',e);}})();
