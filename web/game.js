@@ -43,7 +43,7 @@
   function cashout(){save.checkpoint=null;mode="home";persist();home();}
   function shareChallenge(){
     const code=GE.challengeCode(seed);
-    show("challenge","Can they get further?",`<p>The same house. The same hunting order. See who escapes more floors.</p><input id="shareCode" class="challengeCode" value="${code}" readonly aria-label="Challenge code"><p>${escaped} floors escaped · ${totalRunSeals} seals recovered</p><button id="copyChallenge" class="primary">COPY CHALLENGE CODE</button><p>Enter this code in Objectives on another device running version 5.0. Scores stay on each device.</p>`);
+    show("challenge","Can they get further?",`<p>The same house. The same hunting order. See who escapes more floors.</p><input id="shareCode" class="challengeCode" value="${code}" readonly aria-label="Challenge code"><p>${escaped} floors escaped · ${escaped} scenarios solved</p><button id="copyChallenge" class="primary">COPY CHALLENGE CODE</button><p>Enter this code in Objectives on another device running version 6.0. Scores stay on each device.</p>`);
     $("#copyChallenge").onclick=async()=>{try{await navigator.clipboard.writeText(code);toast("CHALLENGE CODE COPIED");}catch{$("#shareCode").focus();$("#shareCode").select();toast("SELECTED · COPY THIS CODE");}};
   }
   function persistStats(write = true) {
@@ -131,7 +131,7 @@
     if(!save.guided){pendingKind=k;pendingSeed=challengeSeed;beginLesson();}
     persist();
   }
-  function beginLesson(){lesson=0;tutorial=false;close();mode="play";run.training=true;save.checkpoint=null;persist();run.grace=1e9;run.energy=65;run.trainingTarget=null;lessonYaw=run.player.yaw;lessonSteps=run.steps;$("#coach").hidden=false;banner("BEFORE THE HOUSE WAKES","Learn the controls here. You are safe.");}
+  function beginLesson(){lesson=0;tutorial=false;close();mode="play";run.training=true;scene.build(run);save.checkpoint=null;persist();run.grace=1e9;run.energy=65;run.trainingTarget=null;lessonYaw=run.player.yaw;lessonSteps=run.steps;$("#coach").hidden=false;banner("BEFORE THE HOUSE WAKES","Learn the controls here. You are safe.");}
   function endLesson(){save.guided=true;save.tutorial=true;save.hauntTips=true;lesson=-1;$("#coach").hidden=true;run.training=false;mode="home";save.checkpoint=null;persist();start(pendingKind,pendingSeed);}
   function teach(){
     if(lesson<0||!run.training)return;
@@ -139,11 +139,11 @@
     if(lesson===0){text="DRAG THE RIGHT SIDE TO LOOK · Turn until you can see beside you.";if(Math.abs(run.player.yaw-lessonYaw)>.65)lesson++;}
     else if(lesson===1){text="MOVE WITH THE LEFT PAD · Drag in any direction. Push farther to move faster.";if(run.steps-lessonSteps>3)lesson++;}
     else if(lesson===2){target=nearest(run.cells.filter(o=>!o.taken));text="PICK UP LIGHT · Follow the guide to a blue flask. Approach and tap TAKE LIGHT.";if(run.cells.some(o=>o.taken))lesson++;}
-    else if(lesson===3){target=nearest(run.seals.filter(o=>!o.taken));text="TAKE A SEAL · Follow the guide. Get close and tap TAKE SEAL.";if(run.sealCount>0)lesson++;}
+    else if(lesson===3){target=run.page;text="READ A MEMORY · Follow the guide. Approach the page and tap TAKE PAGE. Story pages are optional.";if(run.page.taken)lesson++;}
     else if(lesson===4){target=nearest(run.hides);text="HIDE · Follow the guide to a wardrobe, then tap HIDE. Never hide while it can see you.";if(run.hidden)lesson++;}
     else if(lesson===5){text="LEAVE COVER · The breath bar is your time limit. Tap LEAVE COVER now.";if(!run.hidden){lesson++;run.trainingCombat=true;const spots=[];for(let y=1;y<GE.H-1;y++)for(let x=1;x<GE.W-1;x++){const q=GE.center(x,y),d=GE.dist(run.player,q);if(run.walkable(x,y)&&d>3&&d<7&&run.line(run.player,q))spots.push(q);}const q=spots[0]||run.spawn;Object.assign(run.ghost,{...q,state:"hunt",materialize:0,fear:0,banish:0});run.player.yaw=Math.atan2(-(q.x-run.player.x),-(q.z-run.player.z));run.player.pitch=0;run.energy=100;audio.event("manifest",run);}}
     else if(lesson===6){target=run.ghost;text="REPEL · Aim at the ghost and HOLD BEAM. Drag BEAM to aim too. This practice ghost cannot hurt you.";if(run.repels>0){lesson++;audio.event("cell",run);}}
-    else{text="READY · Find 3 seals, use the exit, survive the next house. Three hits end your escape.";$("#lessonDone").hidden=false;}
+    else{text="READY · Each house has a different escape task. Read the objective at the top left. Three hits end your escape.";$("#lessonDone").hidden=false;}
     run.trainingTarget=target;$("#coachStep").textContent="SURVIVAL LESSON "+Math.min(8,lesson+1)+" / 8";$("#coachText").textContent=text;
   }
   $("#skipLesson").onclick=endLesson;$("#lessonDone").onclick=endLesson;
@@ -169,7 +169,7 @@
     audio.unlock();
     audio.active = true;
     guideUntil = performance.now() + 12e3;
-    banner(GE.ENVIRONMENTS[run.layout]+" · "+run.haunt.name,run.haunt.clue);toast(run.challenge.rule);
+    banner(run.challenge.name,run.challenge.rule);toast(run.haunt.name+" · "+run.haunt.clue);
     persist();
   }
   function acknowledge() {
@@ -192,7 +192,7 @@
     showPause();
   }
   function showPause() {
-    show("pause", "The house can wait.", `<p>Floor ${run.floor} \xB7 ${run.sealCount} of 3 seals recovered</p><button id="resume" class="primary">RETURN TO THE HOUSE <b>\u2192</b></button><button class="secondary" data-open="settings">SETTINGS</button><button class="secondary" data-open="how">CONTROLS</button><button class="secondary" data-open="journal">THE JOURNAL</button><button id="shareChallenge" class="secondary">CHALLENGE A FRIEND</button><button id="leave" class="secondary">SAVE & RETURN TO ENTRANCE</button>`);
+    show("pause", "The house can wait.", `<p>Floor ${run.floor} \xB7 ${run.challenge.name}<br>${run.missionText()}</p><button id="resume" class="primary">RETURN TO THE HOUSE <b>\u2192</b></button><button class="secondary" data-open="settings">SETTINGS</button><button class="secondary" data-open="how">CONTROLS</button><button class="secondary" data-open="journal">THE JOURNAL</button><button id="shareChallenge" class="secondary">CHALLENGE A FRIEND</button><button id="leave" class="secondary">SAVE & RETURN TO ENTRANCE</button>`);
     $("#resume").onclick = resume;
     $("#leave").onclick = home;
     $("#shareChallenge").onclick=shareChallenge;
@@ -243,13 +243,13 @@
     save.checkpoint=null;persist();
     setTimeout(()=>{if(mode==="dead")audio.active=false;},950);
     resetInput();
-    show("results", "The house kept you.", `<p>The ghost broke your health. It moves faster than your walk. Sprint for space, then turn your beam on it. A sharp inhale warns of a rush.</p><div class="stats"><div>${escaped}<small>FLOORS ESCAPED</small></div><div>${totalRunSeals}<small>SEALS RECOVERED</small></div><div>${totalRunRepels}<small>GHOST REPELLED</small></div></div><button id="retry" class="primary">TRY ANOTHER ESCAPE <b>\u2192</b></button><button class="secondary" data-open="objectives">OBJECTIVES</button><button id="shareChallenge" class="secondary">CHALLENGE A FRIEND</button><button id="tohome" class="secondary">BACK TO ENTRANCE</button>`);
+    show("results", "The house kept you.", `<p>The ghost broke your health. It moves faster than your walk. Sprint for space, then turn your beam on it. A sharp inhale warns of a rush.</p><div class="stats"><div>${escaped}<small>FLOORS ESCAPED</small></div><div>${escaped}<small>SCENARIOS SOLVED</small></div><div>${totalRunRepels}<small>GHOST REPELLED</small></div></div><button id="retry" class="primary">TRY ANOTHER ESCAPE <b>\u2192</b></button><button class="secondary" data-open="objectives">OBJECTIVES</button><button id="shareChallenge" class="secondary">CHALLENGE A FRIEND</button><button id="tohome" class="secondary">BACK TO ENTRANCE</button>`);
     $("#close").hidden = true;
     $("#retry").onclick = () => start(kind,seed);
     $("#shareChallenge").onclick=shareChallenge;
     $("#tohome").onclick = home;
   }
-  const objectiveDefs = [["totalSeals", 6, "Recover 6 seals", 60], ["totalRepels", 5, "Repel the ghost 5 times", 50], ["totalEscapes", 3, "Escape 3 floors", 100]];
+  const objectiveDefs = [["totalEscapes", 6, "Complete 6 escape scenarios", 60], ["totalRepels", 5, "Repel the ghost 5 times", 50], ["totalEscapes", 3, "Escape 3 floors", 100]];
   function open(name) {
     if (mode === "play") pause();
     const row = (a, b) => `<div class="row">${a}${b}</div>`;
@@ -276,7 +276,7 @@
       document.querySelectorAll("[data-skin]").forEach((b) => b.onclick = () => {
         const s = GE.SKINS.find((v) => v[0] === b.dataset.skin);
         if (!save.owned.includes(s[0])) {
-          if (save.coins < s[2]) return toast("Recover seals and escape floors to earn remnants.");
+          if (save.coins < s[2]) return toast("Solve escape tasks and complete floors to earn remnants.");
           save.coins -= s[2];
           save.owned.push(s[0]);
         }
@@ -291,8 +291,8 @@
       show(name, "Something worth escaping for.", objectiveDefs.map(([key, goal, label, reward], i) => {
         const progress = Math.max(0, save[key] - save.claims[i] * goal);
         return row(`<span>${label}<small>${Math.min(goal, progress)} / ${goal} \xB7 +${reward} remnants</small></span>`, `<button data-claim="${i}" ${progress < goal ? "disabled" : ""}>CLAIM</button>`);
-      }).join("") + `<div class="stats"><div>${save.bestFloors}<small>BEST ESCAPE</small></div><div>${save.totalEscapes}<small>FLOORS ESCAPED</small></div><div>${save.runs}<small>ATTEMPTS</small></div></div><p>Daily record: ${save.daily.date === GE.dateKey() ? save.daily.best : 0} floors. Escape one floor for a 60-remnant reward once per UTC day.</p><div class="challengeEntry"><label for="challengeInput">HAVE A CHALLENGE CODE?</label><input id="challengeInput" class="challengeCode" maxlength="17" placeholder="GE50-…" autocapitalize="characters" spellcheck="false"><button id="startChallenge" class="secondary">ENTER THIS HOUSE</button></div>`);
-      $("#startChallenge").onclick=()=>{const n=GE.parseChallenge($("#challengeInput").value);if(n===null)return toast("CHECK THE CODE · USE THE COMPLETE GE50 CODE");start("challenge",n);};
+      }).join("") + `<div class="stats"><div>${save.bestFloors}<small>BEST ESCAPE</small></div><div>${save.totalEscapes}<small>FLOORS ESCAPED</small></div><div>${save.runs}<small>ATTEMPTS</small></div></div><p>Daily record: ${save.daily.date === GE.dateKey() ? save.daily.best : 0} floors. Escape one floor for a 60-remnant reward once per UTC day.</p><div class="challengeEntry"><label for="challengeInput">HAVE A CHALLENGE CODE?</label><input id="challengeInput" class="challengeCode" maxlength="17" placeholder="GE60-…" autocapitalize="characters" spellcheck="false"><button id="startChallenge" class="secondary">ENTER THIS HOUSE</button></div>`);
+      $("#startChallenge").onclick=()=>{const n=GE.parseChallenge($("#challengeInput").value);if(n===null)return toast("CHECK THE CODE · USE THE COMPLETE GE60 CODE");start("challenge",n);};
       document.querySelectorAll("[data-claim]").forEach((b) => b.onclick = () => {
         const i = +b.dataset.claim, [key, goal, label, reward] = objectiveDefs[i];
         if (save[key] - (save.claims[i] || 0) * goal >= goal) {
@@ -305,9 +305,9 @@
       });
     }
     if(name==="journal")show(name,"What the house remembers.",`<p>${save.journal.length} / ${GE.JOURNAL.length} memories recovered. An optional page waits on every floor. Recover the full story for 300 remnants.</p><div class="journal">`+GE.JOURNAL.map(([title,body],i)=>`<article class="${save.journal.includes(i)?"read":"locked"}"><small>MEMORY ${String(i+1).padStart(2,"0")}</small><h3>${save.journal.includes(i)?title:"Still inside the house"}</h3><p>${save.journal.includes(i)?body:"Find a page while exploring. You can escape without it."}</p></article>`).join("")+"</div>");
-    if (name === "how") show(name, "Learn the house.", `<div class="instruction"><b>\u2194</b><div><strong>MOVE AND LOOK</strong><p>Keyboard: WASD moves, arrow keys turn, Shift runs. Drag anywhere in the scene to look. On touch, use the left pad to move and drag the right side to look. Hold RUN to sprint.</p></div></div><div class="instruction"><b>\u2727</b><div><strong>RECOVER THREE SEALS</strong><p>Follow the pale floor lights or compass. Get close, look at the seal and press E or INTERACT. Recover all three, then use the marked exit. The next floor generates a new layout.</p></div></div><div class="instruction"><b>\u25C9</b><div><strong>LIGHT AND HIDING</strong><p>Hold Space or BEAM and aim at the ghost for a moment to drive it away. On touch, drag the held BEAM button to aim without letting go. Release to recharge. Blue flasks restore charge. Use E at a wardrobe to hide; use it again to leave. If the ghost sees you enter, it can find you. Your breath lasts about seven seconds.</p></div></div><button id="replayLesson" class="secondary">PLAY THE SURVIVAL LESSON</button><p>Each house adds a rule: restore power at the red fuse box, unbind red seals with the beam, avoid noisy glass or survive blackouts. The HUD tells you the rule.</p><p>The Drifter and Whisper can relocate when out of sight. Cold air warns you as it emerges; it cannot hit until it has formed. A sharp inhale warns of a short rush. M opens the explored map, where echoes show an old sighting or an uncertain spawn area and fade after a few seconds. Escape pauses. Three hits end the escape; reaching a new floor restores one health.</p>`);
+    if (name === "how") show(name, "Learn the house.", `<div class="instruction"><b>\u2194</b><div><strong>MOVE AND LOOK</strong><p>Keyboard: WASD moves, arrow keys turn, Shift runs. Drag anywhere in the scene to look. On touch, use the left pad to move and drag the right side to look. Hold RUN to sprint.</p></div></div><div class="instruction"><b>\u2727</b><div><strong>READ THE ESCAPE TASK</strong><p>Every floor changes the task: repair a generator, solve a bell sequence, carry a cursed urn, survive a radio call, reveal a false mirror or trap the ghost. The top-left objective tells you the next step. Follow the compass, approach the object, then press E or INTERACT.</p></div></div><div class="instruction"><b>\u25C9</b><div><strong>LIGHT AND HIDING</strong><p>Hold Space or BEAM and aim at the ghost for a moment to drive it away. On touch, drag the held BEAM button to aim without letting go. Release to recharge. Blue flasks restore charge. Use E at a wardrobe to hide; use it again to leave. If the ghost sees you enter, it can find you. Your breath lasts about seven seconds.</p></div></div><button id="replayLesson" class="secondary">PLAY THE SURVIVAL LESSON</button><p>Generators need a fuse and six seconds of repair. Bell sequences are written on a brass plaque. Carrying the urn slows you down. The radio keeps running while you evade the ghost. Mirrors reveal their truth under your beam. For the ritual, lure the ghost into the marked ring before repelling it.</p><p>The Drifter and Whisper can relocate when out of sight. Cold air warns you as it emerges; it cannot hit until it has formed. A sharp inhale warns of a short rush. M opens the explored map, where echoes show an old sighting or an uncertain spawn area and fade after a few seconds. Escape pauses. Three hits end the escape; reaching a new floor restores one health.</p>`);
     if(name==="how")$("#replayLesson").onclick=()=>{pendingKind="endless";pendingSeed=null;save.guided=false;start();};
-    if (name === "privacy") show(name, "Your escape stays here.", "<p>This version stores progress, the journal, your active escape and settings on your device. It has no advertising, analytics, purchases, accounts or online leaderboard. Gameplay data is not sent to a server. Copying a challenge places a code on your clipboard only when you choose it.</p><p>Uninstalling or clearing data removes progress. Optional vibration uses your device vibrator.</p><p>Ghost Escape \xB7 Version 5.0.0</p>");
+    if (name === "privacy") show(name, "Your escape stays here.", "<p>This version stores progress, the journal, your active escape and settings on your device. It has no advertising, analytics, purchases, accounts or online leaderboard. Gameplay data is not sent to a server. Copying a challenge places a code on your clipboard only when you choose it.</p><p>Uninstalling or clearing data removes progress. Optional vibration uses your device vibrator.</p><p>Ghost Escape \xB7 Version 6.0.0</p>");
   }
   function closePanel() {
     if (tutorial) return;
@@ -364,7 +364,7 @@
       }
     }
     if(!run.fuse.taken)point(run.fuse,"#ed886b","rect");
-    for (const s of run.seals) if (!s.taken) point(s, "#dcc48a");
+    for (const s of run.training?run.seals:run.tasks) if (!s.taken&&!s.done) point(s, "#dcc48a");
     if(run.page&&!run.page.taken)point(run.page,"#e1aa88","rect");
     for (const h of run.hides) point(h, "#92aaa0", "rect");
     point(run.exit, "#c1d4ab", "rect");
@@ -411,7 +411,9 @@
   function drain() {
     for (const e of run.events.splice(0)) {
       audio.event(e.type, run, e);
-      if(e.type==="power")banner("POWER RESTORED","THE SEALS CAN NOW BE TAKEN · IT HEARD THE SWITCH");
+      if(e.type==="power")banner("GENERATOR RUNNING","THE EXIT IS UNLOCKED");
+      if(e.type==="mission")banner(run.challenge.name,e.text);
+      if(e.type==="missionComplete"){banner("THE HOUSE LETS GO",e.text);save.coins+=24;persist();}
       if(e.type==="unbound")toast("SEAL UNBOUND · APPROACH AND TAKE IT");
       if (e.type === "manifest") {
         if (!run.firstTraceShown) {
@@ -456,10 +458,10 @@
   }
   function hud(now) {
     $("#floor").textContent = String(run.floor).padStart(2, "0");
-    $("#sealCount").textContent = run.sealCount + " / 3";
-    $("#seals").querySelectorAll("i").forEach((e, i) => e.classList.toggle("found", i < run.sealCount));
-    $("#missionTitle").textContent = run.sealCount === 3 ? "THE WAY OUT IS OPEN" : "BREAK THE SEAL";
-    $("#missionText").textContent=run.sealCount===3?"Return to the exit. Open the door.":run.challenge.rule;
+    $("#sealCount").textContent = run.training?run.sealCount+" / 3":run.mission.ready?"EXIT OPEN":run.mission.id==="vigil"&&run.mission.started?Math.ceil(run.mission.duration-run.mission.elapsed)+"s":run.mission.id==="relay"?run.mission.sequence+" / 3 BELLS":run.mission.id==="circuit"&&run.mission.stage===2?Math.floor(run.mission.progress*100)+"%":"ESCAPE TASK";
+    $("#seals").querySelectorAll("i").forEach((e, i) => e.classList.toggle("found", run.mission.ready||i<run.mission.sequence));
+    $("#missionTitle").textContent = run.mission.ready ? "THE WAY OUT IS OPEN" : run.challenge.name;
+    $("#missionText").textContent=run.training?"Follow the survival lesson below.":run.missionText();
     $("#houseName").textContent=GE.ENVIRONMENTS[run.layout]+" · "+run.challenge.name;
     $("#noiseMeter").style.width=(run.noise*100)+"%";$("#healthLabel").textContent="HEALTH "+run.health+" / 3";
     $("#charge").textContent = Math.floor(run.energy) + "%";
@@ -469,19 +471,19 @@
     $("#stamina").style.width = run.stamina + "%";
     $("#health").querySelectorAll("i").forEach((e, i) => e.classList.toggle("lost", i >= run.health));
     $("#presence").textContent=run.haunt.name;
-    const o = run.focus(), names = { fuse:"RESTORE POWER", page:"TAKE PAGE", seal: "TAKE SEAL", cell: "TAKE LIGHT", hide: "HIDE", leave: "LEAVE COVER", exit: run.sealCount === 3 ? "OPEN EXIT" : "SEALED EXIT" };
-    $("#actionName").textContent = o ? names[o.type] : "INTERACT";
+    const o = run.focus(), names = { fuse:"RESTORE POWER", page:"TAKE PAGE", seal: "TAKE SEAL", cell: "TAKE LIGHT", hide: "HIDE", leave: "LEAVE COVER", exit: run.mission.ready ? "OPEN EXIT" : "LOCKED EXIT" };
+    $("#actionName").textContent = o ? (o.type==="task"?o.kind==="mirror"&&o.revealed?"BREAK MIRROR":o.label:names[o.type]) : "INTERACT";
     $("#interact").classList.toggle("ready", !!o);
     $("#reticle").classList.toggle("active", !!o);
-    $("#contextName").textContent = o ? { fuse:"DEAD CIRCUIT · RESTORE POWER", page:"A MEMORY · OPTIONAL", seal: "A SEAL OF THE HOUSE", cell: "A CHARGE OF LIGHT", hide: "AN EMPTY WARDROBE", leave: "YOU ARE HIDDEN", exit: run.sealCount === 3 ? "THE WAY OUT" : "THREE SEALS BIND THIS DOOR" }[o.type] : "";
-    $("#contextHint").textContent = o ? matchMedia("(pointer:coarse)").matches ? "TAP " + names[o.type] : "[ E ] " + names[o.type] : "";
+    $("#contextName").textContent = o?.type==="task"?o.label:o ? { fuse:"DEAD CIRCUIT · RESTORE POWER", page:"A MEMORY · OPTIONAL", seal: "A SEAL OF THE HOUSE", cell: "A CHARGE OF LIGHT", hide: "AN EMPTY WARDROBE", leave: "YOU ARE HIDDEN", exit: run.mission.ready ? "THE WAY OUT" : "FINISH THE ESCAPE TASK" }[o.type] : "";
+    $("#contextHint").textContent = o ? matchMedia("(pointer:coarse)").matches ? "TAP " + (o.type==="task"?o.label:names[o.type]) : "[ E ] " + (o.type==="task"?o.label:names[o.type]) : "";
     $("#hiding").hidden = !run.hidden;
     document.body.classList.toggle("hiding", !!run.hidden);
     $("#breath").style.width = run.breath + "%";
     $("#hideMessage").textContent = run.ghost.seenHide ? "It saw you enter. Leave now." : "Stay quiet. Let it pass.";
     const target = run.objective(), dx = target.x - run.player.x, dz = target.z - run.player.z, bearing = Math.atan2(dx, -dz) + run.player.yaw;
     $("#bearing").style.transform = "rotate(" + bearing + "rad)";
-    $("#targetName").textContent=target.type==="fuse"?"POWER":run.training?"LESSON":run.sealCount===3?"EXIT":"SEAL";
+    $("#targetName").textContent=run.training?"LESSON":target.type==="exit"?"EXIT":target.kind==="fusepart"?"FUSE":target.kind?.toUpperCase()||"TASK";
     $("#targetDistance").textContent = Math.round(GE.dist(run.player, target)) + "m";
     const g = run.ghost, d = GE.dist(g, run.player), text = g.state === "repelled" ? "KEEP THE BEAM ON IT" : g.windup > 0 ? "IT IS DRAWING BREATH" : g.burst > 0 ? "MOVE. NOW." : g.state === "materializing" ? "THE AIR WENT COLD" : g.state === "phasing" ? "IT MOVED INTO THE DARK" : g.state === "hunt" && d < 9 ? "DON\u2019T LET IT REACH YOU" : g.state === "banished" ? "A MOMENT TO BREATHE" : g.state !== "dormant" && d < 12 ? "LISTEN TO THE BREATH" : now < guideUntil ? "FOLLOW THE PALE LIGHTS" : "";
     const cue=run.time<run.cueUntil?run.cue:text;

@@ -1,7 +1,7 @@
 {
   "name": "ghost-escape",
   "private": true,
-  "version": "1.0.0",
+  "version": "6.0.0",
   "description": "Ghost Escape — one tap, two worlds",
   "scripts": {
     "sync": "npx cap sync android",

@@ -174,6 +174,7 @@ window.HouseAudio = class {
   }
   breathe(run, strong = false) {
     const pan = this.direction(run);
+
     this.noise(strong?1.25:.85,strong?.4:.22,1050,pan);
     this.noise(strong ? 1.5 : 1.1, strong ? 0.09 : 0.045, 2200, pan, "bandpass", 0.25);
     this.tone(67, 0.85, "sine", strong ? 0.06 : 0.025, 45, pan);
@@ -181,6 +182,11 @@ window.HouseAudio = class {
   event(n, run, e = {}) {
     if (!this.ctx || !this.active) return;
     const pan = this.direction(run);
+    if(n==="missionAlarm"||n==="bell"){for(let i=0;i<3;i++)this.tone(164*(i+1),1.8,"sine",.09/(i+1),100*(i+1),pan,false,i*.06);this.noise(.6,.16,320,pan,"lowpass");return;}
+    if(n==="distantKnock"){for(let i=0;i<3;i++)this.noise(.12,.12,160,e.pan||0,"lowpass",i*.23);return;}
+    if(n==="missionComplete"){for(let i=0;i<3;i++)this.tone(220*[1,1.2,1.5][i],1.4,"sine",.07,220*[1,1.2,1.5][i],0,false,i*.13);return;}
+    if(n==="mission"){this.tone(330,.25,"sine",.05,165,0);return;}
+
     if(n==="glass"){for(let i=0;i<5;i++){this.noise(.16,.28,2800+i*310,pan,"highpass",i*.035);this.tone(1600+i*190,.2,"sine",.045,800+i*70,pan,false,i*.02);}return;}
     if(n==="power"||n==="blackout"){this.noise(.28,.42,680,0,"lowpass");this.tone(130,.4,"sawtooth",.09,45);return;}
     if(n==="detected"){this.tone(188,.85,"sawtooth",.055,196,pan);this.noise(.45,.2,1300,pan);return;}

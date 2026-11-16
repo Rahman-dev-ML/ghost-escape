@@ -32,12 +32,15 @@ workflows:
       - name: Increment build number
         script: |
           cd $CM_BUILD_DIR/ios/App
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || true)
-          if [ -z "$LATEST_BUILD_NUMBER" ] || [ "$LATEST_BUILD_NUMBER" = "null" ]; then
+          LATEST_TF=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo "")
+          LATEST_AS=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo "")
+          LATEST_BUILD_NUMBER=$(( LATEST_TF > LATEST_AS ? LATEST_TF : LATEST_AS ))
+          if [ -z "$LATEST_BUILD_NUMBER" ] || [ "$LATEST_BUILD_NUMBER" = "0" ]; then
             UPDATED_BUILD_NUMBER=$BUILD_NUMBER
           else
             UPDATED_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
           fi
+          echo "Latest TF=$LATEST_TF AS=$LATEST_AS → new build=$UPDATED_BUILD_NUMBER"
           agvtool new-version -all "$UPDATED_BUILD_NUMBER"
       - name: Build IPA
         script: |

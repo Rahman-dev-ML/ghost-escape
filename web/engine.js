@@ -49,10 +49,10 @@
   ];
   function challengeCode(seed) {
     const body = (seed >>> 0).toString(36).toUpperCase();
-    return "GE50-" + body + "-" + (hash(body) % 1296).toString(36).toUpperCase().padStart(2,"0");
+    return "GE60-" + body + "-" + (hash(body) % 1296).toString(36).toUpperCase().padStart(2,"0");
   }
   function parseChallenge(text) {
-    const m = String(text).trim().toUpperCase().match(/^GE50-([0-9A-Z]{1,7})-([0-9A-Z]{2})$/);
+    const m = String(text).trim().toUpperCase().match(/^GE60-([0-9A-Z]{1,7})-([0-9A-Z]{2})$/);
     if (!m) return null;
     const seed = parseInt(m[1],36);
     return seed <= 0xffffffff && challengeCode(seed) === m[0] ? seed : null;
@@ -67,7 +67,12 @@
       this.layout=(floor-1+(seed>>>0)%5)%5;
       const plans=[[[1,10,7,5],[11,10,7,5],[11,1,7,5],[1,1,7,5]],[[1,11,5,5],[1,1,5,6],[8,1,4,6],[14,1,4,6],[9,10,9,6]],[[6,10,7,6],[1,3,4,9],[6,1,7,6],[14,3,4,9]],[[1,11,6,5],[1,1,6,7],[10,1,8,4],[10,8,4,8],[15,8,3,8]],[[1,10,5,6],[1,1,6,6],[9,1,9,4],[13,8,5,8],[7,9,4,7]]];
       const labels=[["THE ENTRANCE","DINING ROOM","PORTRAIT GALLERY","THE LIBRARY"],["ADMISSIONS","ISOLATION","OBSERVATION","OPERATING ROOM","THE WARD"],["VESTIBULE","WEST AISLE","THE ALTAR","EAST AISLE"],["THE LANDING","FORGOTTEN STORAGE","THE NURSERY","THE EAVES","THE LOCKED ROOM"],["BOILER ROOM","THE CISTERN","THE WORKSHOP","THE ARCHIVE","THE CELLAR"]];
-      this.rooms=plans[this.layout].map(([x,y,w,h],i)=>({x,y,w:w-(w>5&&this.random()<.45?1:0),h:h-(h>5&&this.random()<.45?1:0),name:labels[this.layout][i]}));
+      const alternate=[[[6,11,7,5],[1,2,5,7],[7,1,5,6],[13,2,5,7]],[[1,1,7,5],[11,1,7,5],[1,10,5,6],[7,10,5,6],[13,10,5,6]],[[1,10,6,6],[1,1,6,6],[10,1,8,6],[10,10,8,6]],[[7,10,5,6],[1,1,5,6],[7,1,5,6],[13,1,5,6],[13,10,5,6]],[[1,1,5,6],[8,1,4,6],[14,1,4,6],[1,10,8,6],[12,10,6,6]]];
+      const plan=((seed>>>7)+floor)%2?plans[this.layout]:alternate[this.layout];
+      this.rooms=plan.map(([x,y,w,h],i)=>({x,y,w:w-(w>5&&this.random()<.45?1:0),h:h-(h>5&&this.random()<.45?1:0),name:labels[this.layout][i]||"THE ANNEX"}));
+      if((seed>>>3)%2)this.rooms.forEach(r=>r.x=W-r.x-r.w);
+      // A different entrance changes the route through the same architectural family.
+      const entryIndex=(seed+floor*3)%this.rooms.length;this.rooms=[...this.rooms.slice(entryIndex),...this.rooms.slice(0,entryIndex)];
       const carve=(x,y)=>{if(x>0&&y>0&&x<W-1&&y<H-1)this.grid[y*W+x]=1;};
       for(const r of this.rooms)for(let y=r.y;y<r.y+r.h;y++)for(let x=r.x;x<r.x+r.w;x++)carve(x,y);
       const roomCell=r=>({x:r.x+1+Math.floor(this.random()*(r.w-2)),y:r.y+1+Math.floor(this.random()*(r.h-2))});
@@ -124,15 +129,97 @@
       }
       places.sort((a,b)=>dist(b,this.spawn)-dist(a,this.spawn));
       this.page={...places[(floor-1)%Math.min(12,places.length)],type:"page",id:"page",index:(floor-1)%JOURNAL.length,taken:false};
+      this.setupMission();
       this.reveal();
     }
+    setupMission(){
+      const defs=[
+        {id:"circuit",name:"DEAD CIRCUIT",rule:"Find a fuse. Install it in the generator, then stay close while it starts."},
+        {id:"relay",name:"THE HOUSE HAS A VOICE",rule:"Read the brass inscription. Ring the three bells in its order."},
+        {id:"relic",name:"DO NOT LOOK BACK",rule:"Steal the funeral urn and carry it to the exit. Its weight slows you down."},
+        {id:"vigil",name:"THE MIDNIGHT CALL",rule:"Start the radio transmission. Survive until the rescue lock opens."},
+        {id:"anomaly",name:"THE FALSE REFLECTION",rule:"Inspect each mirror with your beam. Break the one that bleeds red."},
+        {id:"exorcism",name:"THE LAST RITE",rule:"Arm the circle. Lure the ghost inside and repel it there to break the curse."}
+      ];
+      // Six distinct introductions, then seeded permutations. Never repeat at a chapter boundary.
+      let index=(this.floor-1)%6;
+      if(this.floor>6){const chapter=Math.floor((this.floor-1)/6),rr=rng(this.seed+chapter*31337),order=[0,1,2,3,4,5];for(let i=5;i>0;i--){const j=Math.floor(rr()*(i+1));[order[i],order[j]]=[order[j],order[i]];}let last=5;if(chapter>1){const prev=[0,1,2,3,4,5],pr=rng(this.seed+(chapter-1)*31337);for(let i=5;i>0;i--){const j=Math.floor(pr()*(i+1));[prev[i],prev[j]]=[prev[j],prev[i]];}last=prev[5];}if(order[0]===last)[order[0],order[1]]=[order[1],order[0]];index=order[index];}
+      const d=defs[index];this.challenge={...d};this.powerOn=true;this.fuse.taken=true;
+      this.seals.forEach(o=>{o.taken=true;o.charge=1;});this.sealCount=0;
+      this.tasks=[];const add=(kind,label,q)=>{const o={id:"task"+this.tasks.length,type:"task",kind,label,x:q.x,z:q.z,done:false,revealed:false};this.tasks.push(o);return o;};
+      this.mission={id:d.id,stage:0,progress:0,elapsed:0,ready:false,carrying:false,started:false,clueRead:false,sequence:0,timer:0,channel:0,cooldown:0,order:[0,1,2]};
+      const m=this.mission,spots=this.seals;
+      if(d.id==="circuit"){add("fusepart","TAKE FUSE",spots[0]);add("generator","START GENERATOR",spots[2]);}
+      if(d.id==="relay"){for(let i=0;i<3;i++)add("bell","RING BELL "+(i+1),spots[i]);add("clue","READ INSCRIPTION",this.fuse);for(let i=2;i>0;i--){const j=Math.floor(this.random()*(i+1));[m.order[i],m.order[j]]=[m.order[j],m.order[i]];}}
+      if(d.id==="relic")add("urn","TAKE FUNERAL URN",spots[2]);
+      if(d.id==="vigil"){add("radio","START TRANSMISSION",spots[1]);add("bell","RING DISTRACTION BELL",spots[2]);m.duration=Math.min(65,35+this.floor*2);}
+      if(d.id==="anomaly"){for(let i=0;i<3;i++)add("mirror","INSPECT MIRROR "+(i+1),spots[i]);m.falseMirror=Math.floor(this.random()*3);}
+      if(d.id==="exorcism")add("circle","ARM RITUAL CIRCLE",spots[1]);
+      this.director={pressure:0,rest:0,nextEvent:20+this.random()*15};
+      this.hazards=this.floor>6?this.hazards:[];
+    }
+    missionText(){
+      const m=this.mission;
+      if(m.ready)return m.carrying?"Carry the urn to the exit. You move slower; use cover and your beam.":"The exit is unlocked. Get out.";
+      if(m.id==="circuit")return m.stage===0?"Find the ceramic fuse. Follow FUSE on your compass.":m.stage===1?"Bring the fuse to the generator and interact.":"Start the generator. Stay nearby for 6 seconds; BEAM interrupts the repair. "+Math.floor(m.progress*100)+"%";
+      if(m.id==="relay")return !m.clueRead?"Read the brass inscription before ringing the bells.":"Ring bells: "+m.order.map(i=>i+1).join(" → ")+". Correct: "+m.sequence+" / 3. Wrong bells reset the sequence.";
+      if(m.id==="relic")return "Take the funeral urn. Plan your route back before lifting it.";
+      if(m.id==="vigil")return !m.started?"Start the radio, then stay alive. You can leave the radio running.":"SURVIVE "+Math.ceil(m.duration-m.elapsed)+"s · Use the bell to draw the ghost away.";
+      if(m.id==="anomaly")return "Hold BEAM on mirrors to inspect. Only one glows red. Approach it and BREAK MIRROR.";
+      return !m.started?"Arm the ritual circle, then lure the ghost into its ring.":"Stand beyond the circle. Repel the ghost while it is inside the red ring.";
+    }
+    missionTarget(){
+      const m=this.mission;
+      if(m.ready)return this.exit;
+      if(m.id==="circuit")return this.tasks[m.stage===0?0:1];
+      if(m.id==="relay")return !m.clueRead?this.tasks[3]:this.tasks[m.order[m.sequence]];
+      if(m.id==="anomaly"){const known=this.tasks[m.falseMirror];if(known.revealed)return known;return this.tasks.filter(o=>!o.revealed).sort((a,b)=>dist(a,this.player)-dist(b,this.player))[0]||known;}
+      if(m.id==="vigil"&&m.started)return this.exit;
+      return this.tasks[0];
+    }
+    alarm(q=this.player){this.noise=1;this.ghost.alert=10;this.ghost.memory={x:q.x,z:q.z};this.ghost.repath=0;this.powerDip=1.8;this.events.push({type:"missionAlarm"});}
+    missionDone(){if(this.mission.ready)return;this.mission.ready=true;this.events.push({type:"missionComplete",text:"THE EXIT IS UNLOCKED"});this.signal("THE EXIT IS UNLOCKED",4);}
+    useTask(o){
+      const m=this.mission;if(this.training)return false;
+      if(m.ready&&o.kind!=="bell")return false;
+      if(m.id==="circuit"){
+        if(o.kind==="fusepart"){o.done=true;m.stage=1;this.events.push({type:"mission",text:"FUSE FOUND · TAKE IT TO THE GENERATOR"});}
+        else if(m.stage===0){this.events.push({type:"hint",text:"The generator needs a fuse. Follow FUSE."});return false;}
+        else {m.stage=2;m.channel=1;this.alarm(o);this.events.push({type:"mission",text:"GENERATOR STARTING · STAY CLOSE · BEAM CANCELS"});}
+      } else if(m.id==="relay"){
+        if(o.kind==="clue"){m.clueRead=true;this.events.push({type:"mission",text:this.missionText()});}
+        else if(!m.clueRead){this.events.push({type:"hint",text:"Read the brass inscription first."});return false;}
+        else {const index=this.tasks.indexOf(o);this.alarm(o);if(index===m.order[m.sequence]){m.sequence++;this.events.push({type:"mission",text:"BELL ANSWERED · "+m.sequence+" / 3"});if(m.sequence===3)this.missionDone();}else{m.sequence=0;this.events.push({type:"hint",text:"WRONG BELL · THE HOUSE ANSWERS · SEQUENCE RESET"});}}
+      } else if(m.id==="relic"){m.carrying=true;o.done=true;this.alarm();this.grace=Math.min(this.grace,this.time);this.missionDone();}
+      else if(m.id==="vigil"){
+        if(o.kind==="radio"){if(m.started)return false;m.started=true;this.alarm(o);this.events.push({type:"mission",text:"SIGNAL SENT · SURVIVE "+m.duration+" SECONDS"});}
+        else{if(m.cooldown>0){this.events.push({type:"hint",text:"BELL RESETTING · "+Math.ceil(m.cooldown)+"s"});return false;}m.cooldown=8;this.alarm(o);this.ghost.alert=14;this.events.push({type:"bell"});}
+      } else if(m.id==="anomaly"){
+        if(!o.revealed){this.events.push({type:"hint",text:"Inspect this mirror with BEAM before breaking it."});return false;}
+        if(this.tasks.indexOf(o)===m.falseMirror){o.done=true;this.alarm();this.missionDone();}else{this.alarm();this.events.push({type:"hint",text:"AN ORDINARY REFLECTION · FIND THE RED MIRROR"});}
+      } else if(m.id==="exorcism"){m.started=true;this.alarm(o);this.grace=Math.min(this.grace,this.time);this.events.push({type:"mission",text:"CIRCLE ARMED · LURE IT INTO THE RING, THEN HOLD BEAM"});}
+      return true;
+    }
+    stepMission(dt){
+      if(this.training)return;
+      const m=this.mission,g=this.ghost,p=this.player;m.cooldown=Math.max(0,m.cooldown-dt);
+      if(m.id==="circuit"&&m.channel&&!m.ready){const q=this.tasks[1];if(dist(p,q)>2.8||this.hidden||this.held){m.channel=0;this.events.push({type:"hint",text:"REPAIR INTERRUPTED · INTERACT TO CONTINUE"});}else{m.progress=Math.min(1,m.progress+dt/6);if(m.progress>=1){q.done=true;this.missionDone();this.events.push({type:"power"});}}}
+      if(m.id==="vigil"&&m.started&&!m.ready){m.elapsed=Math.min(m.duration,m.elapsed+dt);m.progress=m.elapsed/m.duration;if(m.elapsed>=m.duration)this.missionDone();}
+      if(m.id==="anomaly"&&this.light)for(const o of this.tasks){const d=dist(p,o),f=(-Math.sin(p.yaw)*(o.x-p.x)-Math.cos(p.yaw)*(o.z-p.z))/Math.max(.01,d);if(!o.revealed&&d<7&&f>.9&&this.line(p,o)){o.scan=(o.scan||0)+dt;if(o.scan>1.2){o.revealed=true;this.events.push({type:"mission",text:this.tasks.indexOf(o)===m.falseMirror?"THE GLASS BLEEDS RED · BREAK THIS MIRROR":"ORDINARY REFLECTION · KEEP SEARCHING"});}}}
+      if(m.id==="exorcism"&&m.started&&!m.ready){const q=this.tasks[0];if(dist(g,q)<3.4&&g.state==="repelled"){m.progress=Math.min(1,m.progress+dt/.75);if(m.progress>=1){this.banish();this.missionDone();}}}
+      // Pressure accumulates only during real contact. Quiet time is earned by breaking sight.
+      const contact=g.state==="hunt"&&dist(p,g)<10;
+      this.director.pressure=clamp(this.director.pressure+(contact?dt:-dt*.6),0,30);
+      if(this.director.pressure>22&&!this.line(p,g)){this.director.rest=9;this.director.pressure=0;g.alert=0;}
+      if(this.time>this.director.nextEvent){this.director.nextEvent=this.time+22+this.random()*24;this.events.push({type:"distantKnock",pan:this.random()*2-1});if(this.floor>3&&this.random()<.4){this.blackout=3;this.signal("THE HOUSE IS LISTENING",2);}}
+    }
     snapshot() {
-      const data = {version:2,powerOn:this.powerOn,charges:this.seals.map(o=>o.charge),blackout:this.blackout,nextBlackout:this.nextBlackout,seed:this.seed,floor:this.floor,random:this.random.getState(),player:{...this.player},ghost:JSON.parse(JSON.stringify(this.ghost)),echo:this.echo&&{...this.echo},visited:[...this.visited],seals:this.seals.map(o=>o.taken),cells:this.cells.map(o=>o.taken),page:{index:this.page.index,taken:this.page.taken},hidden:this.hidden?.id||null};
+      const data = {version:3,mission:JSON.parse(JSON.stringify(this.mission)),tasks:this.tasks.map(o=>({done:o.done,revealed:o.revealed})),director:{...this.director},powerOn:this.powerOn,charges:this.seals.map(o=>o.charge),blackout:this.blackout,nextBlackout:this.nextBlackout,seed:this.seed,floor:this.floor,random:this.random.getState(),player:{...this.player},ghost:JSON.parse(JSON.stringify(this.ghost)),echo:this.echo&&{...this.echo},visited:[...this.visited],seals:this.seals.map(o=>o.taken),cells:this.cells.map(o=>o.taken),page:{index:this.page.index,taken:this.page.taken},hidden:this.hidden?.id||null};
       for(const k of ["time","health","energy","stamina","breath","hideTime","invulnerable","sealCount","repels","escapes","steps","grace","dread","powerDip","storm","nextStorm","nextCreak","dead","cleared","firstTraceShown"]) data[k]=this[k];
       return data;
     }
     static restore(data) {
-      if(!data||data.version!==2||!Number.isInteger(data.seed)||data.seed<0||data.seed>0xffffffff||!Number.isInteger(data.floor)||data.floor<1||data.floor>1000000||data.dead) return null;
+      if(!data||data.version!==3||!Number.isInteger(data.seed)||data.seed<0||data.seed>0xffffffff||!Number.isInteger(data.floor)||data.floor<1||data.floor>1000000||data.dead) return null;
       const r=new House(data.seed,data.floor);
       const num=(v,a,b,f)=>Number.isFinite(v)?clamp(v,a,b):f;
       const point=q=>q&&Number.isFinite(q.x)&&Number.isFinite(q.z)&&!r.solid(q.x,q.z,.18);
@@ -145,7 +232,7 @@
       for(const k of ["dread","powerDip","storm"])r[k]=num(data[k],0,4,0);
       r.seals.forEach((o,i)=>o.taken=data.seals?.[i]===true);r.cells.forEach((o,i)=>o.taken=data.cells?.[i]===true);
       r.powerOn=!!data.powerOn;r.fuse.taken=r.powerOn;r.blackout=num(data.blackout,0,10,0);r.nextBlackout=num(data.nextBlackout,0,1e9,r.time+20);r.seals.forEach((o,i)=>o.charge=num(data.charges?.[i],0,1,1));
-      r.sealCount=r.seals.filter(o=>o.taken).length;r.cleared=!!data.cleared&&r.sealCount===3;
+      r.sealCount=0;r.cleared=false;
       r.page.index=Math.floor(num(data.page?.index,0,JOURNAL.length-1,0));r.page.taken=data.page?.taken===true;
       r.visited=r.visited.map((_,i)=>data.visited?.[i]===true);r.hidden=r.hides.find(o=>o.id===data.hidden)||null;
       const g=r.ghost, v=data.ghost;
@@ -156,6 +243,13 @@
       for(const k of ["target","memory"])if(point(v[k]))g[k]={x:v[k].x,z:v[k].z};
       g.path=Array.isArray(v.path)?v.path.filter(point).slice(0,W*H).map(q=>({x:q.x,z:q.z})):[];
       const e=data.echo;if(e&&Number.isFinite(e.x)&&Number.isFinite(e.z)&&Number.isFinite(e.time))r.echo={x:clamp(e.x,0,W*S),z:clamp(e.z,0,H*S),time:clamp(e.time,0,r.time),type:e.type==="disturbance"?"disturbance":"sighting"};
+      if(data.mission&&data.mission.id===r.mission.id){
+        for(const k of ["stage","progress","elapsed","sequence","timer","channel","cooldown"])r.mission[k]=num(data.mission[k],0,1e6,r.mission[k]||0);
+        for(const k of ["ready","carrying","started","clueRead"])r.mission[k]=data.mission[k]===true;
+        r.tasks.forEach((o,i)=>{o.done=data.tasks?.[i]?.done===true;o.revealed=data.tasks?.[i]?.revealed===true;});
+        r.cleared=!!data.cleared&&r.mission.ready;
+      }
+      if(data.director)for(const k of ["pressure","rest","nextEvent"])r.director[k]=num(data.director[k],0,1e9,r.director[k]);
       r.firstTraceShown=!!data.firstTraceShown;r.random.setState(data.random);r.hold(false);r.events=[];r.reveal();return r;
     }
     cell(x, z) {
@@ -227,7 +321,7 @@
     focus() {
       if (this.hidden) return { type: "leave", name: "LEAVE HIDING PLACE", id: "leave" };
       let best = null, bestDist = Infinity;
-      for (const o of [...(!this.fuse.taken?[this.fuse]:[]), ...(this.page&&!this.page.taken?[this.page]:[]), ...this.seals.filter((s) => !s.taken), ...this.cells.filter((s) => !s.taken), ...this.hides, this.exit]) {
+      for (const o of [...(!this.training?this.tasks.filter(o=>!o.done):[]), ...(!this.fuse.taken?[this.fuse]:[]), ...(this.page&&!this.page.taken?[this.page]:[]), ...this.seals.filter((s) => !s.taken), ...this.cells.filter((s) => !s.taken), ...this.hides, this.exit]) {
         const d = dist(this.player, o);
         if (d > 2.25 || d >= bestDist) continue;
         const dir = { x: -Math.sin(this.player.yaw), z: -Math.cos(this.player.yaw) };
@@ -246,6 +340,7 @@
         this.events.push({ type: "hint", text: "Move closer and look at a glowing object." });
         return false;
       }
+      if(o.type==="task")return this.useTask(o);
       if(o.type==="fuse"){this.powerOn=true;o.taken=true;this.noise=1;this.ghost.alert=8;this.ghost.memory={...this.player};this.events.push({type:"power"});return true;}
       if (o.type === "page") {o.taken=true;this.events.push({type:"page",index:o.index});return true;}
       if (o.type === "seal") {
@@ -286,8 +381,8 @@
       }
       if (o.type === "exit") {
         if(this.training){this.events.push({type:"hint",text:"Finish or skip the survival lesson to begin an escape."});return false;}
-        if (this.sealCount < 3) {
-          this.events.push({ type: "hint", text: 3 - this.sealCount + " seals still bind this door." });
+        if (!this.mission.ready) {
+          this.events.push({ type: "hint", text: this.missionText() });
           return false;
         }
         this.cleared = true;
@@ -300,6 +395,7 @@
     }
     objective() {
       if(this.trainingTarget)return this.trainingTarget;
+      if(!this.training)return this.missionTarget();
       if(!this.powerOn)return this.fuse;
       const list = this.seals.filter((s) => !s.taken);
       if (!list.length) return this.exit;
@@ -417,6 +513,10 @@
         g.state = "dormant";
         return;
       }
+      if(this.director.rest>0&&!this.mission.carrying){
+        this.director.rest=Math.max(0,this.director.rest-dt);
+        if(!this.line(p,g)&&dist(p,g)>6){g.state="patrol";g.alert=0;g.target=this.cells.reduce((a,b)=>dist(a,p)>dist(b,p)?a:b);}
+      }
       if (g.state === "dormant") {
         this.manifest();
         return;
@@ -532,7 +632,7 @@
       }
       this.moving = this.hidden ? 0 : Math.min(1, l);
       this.sprinting = !!input.sprint && this.stamina > 3 && !this.hidden && l > 0.1;
-      const speed = this.sprinting ? 5.2 : 3.35;
+      const speed = (this.sprinting ? 5.2 : 3.35)*(this.mission.carrying&&!this.training?.78:1);
       this.stamina = clamp(this.stamina + (this.sprinting ? -25 : 16) * dt, 0, 100);
       if (!this.hidden) {
         const dx = (Math.cos(p.yaw) * mx + Math.sin(p.yaw) * mz) * speed * dt, dz = (-Math.sin(p.yaw) * mx + Math.cos(p.yaw) * mz) * speed * dt;
@@ -553,11 +653,11 @@
       if(this.challenge.id==="blackout"&&this.time>this.nextBlackout&&!this.training){this.blackout=4;this.nextBlackout=this.time+16+this.random()*15;this.events.push({type:"blackout"});this.signal("POWER FAILING · KEEP YOUR LIGHT READY",3);}
       for(const h of this.hazards){h.cooldown=Math.max(0,h.cooldown-dt);if(this.moving>.1&&dist(p,h)<.85&&h.cooldown===0){h.cooldown=2;this.noise=1;g.alert=9;g.memory={...p};this.signal("GLASS · IT HEARD YOU",3);this.events.push({type:"glass"});}}
       if(this.light&&this.powerOn)for(const o of this.seals){const d=dist(p,o);if(!o.taken&&o.charge<1&&d<7&&this.line(p,o)&&(-Math.sin(p.yaw)*(o.x-p.x)-Math.cos(p.yaw)*(o.z-p.z))/Math.max(.01,d)>.9){o.charge=Math.min(1,o.charge+dt/1.8);this.signal("UNBINDING SEAL · "+Math.round(o.charge*100)+"%",.3);if(o.charge===1)this.events.push({type:"unbound"});}}
-      this.reveal();this.stepHaunt(dt);
+      this.stepMission(dt);this.reveal();this.stepHaunt(dt);
     }
   }
   function defaults() {
-    return { version: 5, guided:false, checkpoint:null, journal:[], journalReward:false, hauntTips: false, coins: 0, bestFloors: 0, totalSeals: 0, totalRepels: 0, totalEscapes: 0, runs: 0, skin: "wanderer", owned: ["wanderer"], tutorial: false, claims: [0, 0, 0], settings: { sound: true, music: true, haptics: true, reduceMotion: false, softEffects: false, lowDetail:false, guide: true, sensitivity: 1.25, controlSize: 1, autoSprint:false, volume: .85 }, daily: { date: "", best: 0, reward: false } };
+    return { version: 6, guided:false, checkpoint:null, journal:[], journalReward:false, hauntTips: false, coins: 0, bestFloors: 0, totalSeals: 0, totalRepels: 0, totalEscapes: 0, runs: 0, skin: "wanderer", owned: ["wanderer"], tutorial: false, claims: [0, 0, 0], settings: { sound: true, music: true, haptics: true, reduceMotion: false, softEffects: false, lowDetail:false, guide: true, sensitivity: 1.25, controlSize: 1, autoSprint:false, volume: .85 }, daily: { date: "", best: 0, reward: false } };
   }
   function normalize(v) {
     const d = defaults();
